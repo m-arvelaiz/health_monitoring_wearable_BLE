@@ -225,9 +225,10 @@ uint8_t index_con_int, mutex;
 /**
  * Advertising Data
  */
-uint8_t a_AdvData[10] =
+uint8_t a_AdvData[14] =
 {
-  9, AD_TYPE_COMPLETE_LOCAL_NAME, 'X', 'X', '-', 'S', 'T', 'M', '3', '2',  /* Complete name */
+  9, AD_TYPE_COMPLETE_LOCAL_NAME, 'H', 'M', '-', 'S', 'T', 'M', '3', '2',  /* Complete name */
+  3, AD_TYPE_SHORTENED_LOCAL_NAME , 'H', 'M',  /* Shortened name */
 
 };
 
