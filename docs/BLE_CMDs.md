@@ -51,7 +51,7 @@ Final payload: `04 06 00 00 00 00 0A`
 
 | **Field**      | **Size** | **Description**                                                                 |
 |----------------|----------|----------------------------------------------------------------------------------|
-| `DATA_TYPE`    | 1 byte   | Bitmask indicating which values are present (see bitmask table below)            |
+| `CMD`    | 1 byte   | Bitmask indicating which values are present (see bitmask table below)            |
 | `LEN`          | 1 byte   | Payload length: always `0x05`                                                    |
 | `DATA`         | 5 bytes  | One or two sensor values (2 bytes each × N, padded to 5 bytes if needed)         |
 | `TIMESTAMP`    | 4 bytes  | Unix timestamp in seconds (UTC)                                                 |
