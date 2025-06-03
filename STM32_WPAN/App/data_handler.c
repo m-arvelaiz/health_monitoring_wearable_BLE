@@ -28,8 +28,8 @@ static void send_dummy_hr_spo2(void)
 	notif[idx++] = 0x05;
 
 	// DATA: HR (2 bytes), SpO₂ (2 bytes), padding (1 byte)
-	uint16_t dummy_hr = 70;    // e.g., 70 bpm -> 0x0046
-	uint16_t dummy_spo2 = 98;  // e.g., 98% -> 0x0062
+	uint16_t dummy_hr = 7000;    // e.g., 70 bpm -> 0x0046
+	uint16_t dummy_spo2 = 9800;  // e.g., 98% -> 0x0062
 
 	notif[idx++] = 0x00;       // Padding
 	notif[idx++] = (dummy_hr >> 8) & 0xFF;
@@ -173,7 +173,7 @@ static void send_dummy_all_data(void)
         notif[idx1++] = (ts >> 8)  & 0xFF;
         notif[idx1++] = (ts >> 0)  & 0xFF;
 
-        notif[idx] = ble_calculate_chksum(notif, 11);
+        notif[idx1] = ble_calculate_chksum(notif, 11);
         p_ble_notify->Status=Notify_Pending;
 //    }
 //

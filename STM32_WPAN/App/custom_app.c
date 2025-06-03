@@ -127,18 +127,18 @@ void Custom_STM_App_Notification(Custom_STM_App_Notification_evt_t *pNotificatio
     	uint8_t req_length = pNotification->DataTransfered.Length ;
 
     	// Sanity check for minimal packet size (CMD + LEN + CRC)
-		if (req_length < 7)
-			break;
+//		if (req_length < 7)
+//			break;
 		uint8_t cmd = p_Payload[0];
 		uint8_t len = p_Payload[1];
 		uint8_t *params = &p_Payload[2];
 		uint8_t chksum_rcv = p_Payload[req_length - 1];
 		uint8_t chksum_calc = ble_calculate_chksum(p_Payload, req_length - 1);
 
-		if (chksum_rcv != chksum_calc) {
-			// CRC mismatch – discard or respond with error
-			break;
-		}
+//		if (chksum_rcv != chksum_calc) {
+//			// CRC mismatch – discard or respond with error
+//			break;
+//		}
 
 
 		// Filter the CMds
@@ -260,7 +260,7 @@ void Custom_APP_Init(void)
 	Notify_Interface.Status=Notify_None;
 	Notify_Interface.checkSum=0;
 	Notify_Interface.length=0;
-	Notify_Interface.pck=NotifyCharData;
+	Notify_Interface.pck=UpdateCharData;
 
   /* USER CODE END CUSTOM_APP_Init */
   return;

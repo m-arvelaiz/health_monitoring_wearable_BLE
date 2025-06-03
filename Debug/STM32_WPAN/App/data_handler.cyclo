@@ -1,0 +1,13 @@
+../STM32_WPAN/App/data_handler.c:19:13:send_dummy_hr_spo2	1
+../STM32_WPAN/App/data_handler.c:58:13:send_dummy_temp	3
+../STM32_WPAN/App/data_handler.c:114:13:send_dummy_pressure	1
+../STM32_WPAN/App/data_handler.c:150:13:send_dummy_all_data	1
+../STM32_WPAN/App/data_handler.c:237:6:data_handler_req_hr_spo2	1
+../STM32_WPAN/App/data_handler.c:252:6:data_handler_req_temp	1
+../STM32_WPAN/App/data_handler.c:266:6:data_handler_req_pressure	1
+../STM32_WPAN/App/data_handler.c:280:6:data_handler_req_all_data	1
+../STM32_WPAN/App/data_handler.c:295:6:data_handler_req_historical_data	1
+../STM32_WPAN/App/data_handler.c:312:6:data_handler_req_set_unix_time	1
+../STM32_WPAN/App/data_handler.c:329:6:data_handler_req_set_sensor_config	1
+../STM32_WPAN/App/data_handler.c:340:6:data_handler_req_start_stream	1
+../STM32_WPAN/App/data_handler.c:352:6:data_handler_req_stop_stream	1

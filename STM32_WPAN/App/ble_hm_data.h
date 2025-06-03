@@ -10,7 +10,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "custom_stm.h"
+//#include "custom_stm.h"
 #define BLE_DEBUG_DUMMY_DATA
 
 /* USER CODE END Includes */
