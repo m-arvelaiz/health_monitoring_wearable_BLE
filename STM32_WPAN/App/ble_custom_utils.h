@@ -8,7 +8,7 @@
 #ifndef APP_BLE_CUSTOM_UTILS_H_
 #define APP_BLE_CUSTOM_UTILS_H_
 
-
+#include <stdint.h>
 
 uint8_t ble_calculate_chksum(uint8_t *pck, uint8_t length);
 

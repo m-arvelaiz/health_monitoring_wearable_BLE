@@ -11,7 +11,7 @@
 /* Includes ------------------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "custom_stm.h"
-
+#define BLE_DEBUG_DUMMY_DATA
 
 /* USER CODE END Includes */
 
@@ -22,15 +22,7 @@ typedef enum {
 } BLE_NotifyChar_Status;
 
 /* USER CODE BEGIN ET */
-typedef struct
-{
-  uint8_t	pck_id;
-  uint8_t	type;
-  uint8_t	data [8];
-  uint8_t	checkSum;
-  uint8_t	pck[11];
-  uint8_t	length;
-} Custom_BLE_Payload_t;
+
 
 
 typedef struct
@@ -40,5 +32,7 @@ typedef struct
   uint8_t	checkSum;
   uint8_t	length;
 } Custom_BLE_Notify_interface_t;
+
+Custom_BLE_Notify_interface_t* ble_notify_interface_get();
 
 #endif /* APP_BLE_HM_DATA_H_ */

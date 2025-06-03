@@ -5,6 +5,7 @@
  *      Author: magaa
  */
 
+#include "ble_custom_utils.h"
 
 
 

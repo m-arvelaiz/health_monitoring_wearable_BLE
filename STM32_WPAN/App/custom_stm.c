@@ -65,8 +65,8 @@ extern uint16_t Connection_Handle;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-uint16_t SizeCharwrite = 1;
-uint16_t SizeCharnotify = 1;
+uint16_t SizeCharwrite = 7;
+uint16_t SizeCharnotify = 12;
 
 /**
  * START of Section BLE_DRIVER_CONTEXT
@@ -192,6 +192,11 @@ static SVCCTL_EvtAckStatus_t Custom_STM_Event_Handler(void *Event)
           {
             return_value = SVCCTL_EvtAckFlowEnable;
             /* USER CODE BEGIN CUSTOM_STM_Service_1_Char_1_ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE */
+            Notification.Custom_Evt_Opcode = CUSTOM_STM_CHARWRITE_WRITE_EVT;
+            Notification.DataTransfered.Length=attribute_modified->Attr_Data_Length;
+            Notification.DataTransfered.pPayload=attribute_modified->Attr_Data;
+            Custom_STM_App_Notification(&Notification);
+
 
             /* USER CODE END CUSTOM_STM_Service_1_Char_1_ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE */
           } /* if (attribute_modified->Attr_Handle == (CustomContext.CustomCharwriteHdle + CHARACTERISTIC_VALUE_ATTRIBUTE_OFFSET))*/
