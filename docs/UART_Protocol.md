@@ -146,10 +146,8 @@ This improves robustness and allows for higher-level flow control.
 
 ---
 
-## 🧠 Notes
+## 🧠 Improve in the future
 
-- All fields are **big-endian** unless otherwise stated.
-- Avoid using `0xAA` in payloads, or escape it if needed.
 - Consider timeout/retry mechanisms on the BLE MCU side.
 
 ---
