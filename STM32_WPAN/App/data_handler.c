@@ -8,10 +8,15 @@
 
 #include "data_handler.h"
 #include "ble_custom_utils.h"
-#include "ble_hm_data.h"
 #include <string.h>
+#include <stdlib.h>
 
 #ifdef BLE_DEBUG_DUMMY_DATA
+
+
+
+Data_Handler_t* data_handler;
+uint8_t data_handler_buffer[DATA_HANDLER_PAYLOAD_LENGHT];
 /**
  * @brief  Generate and send a dummy HR & SpO₂ notification over BLE.
  *         Structure: [CMD][LEN][DATA(5)][TIMESTAMP(4)][CRC]
@@ -175,57 +180,7 @@ static void send_dummy_all_data(void)
 
         notif[idx1] = ble_calculate_chksum(notif, 11);
         p_ble_notify->Status=Notify_Pending;
-//    }
-//
-//    // Second packet: Temp (0x04) + Pressure (0x08) = data_type 0x0C
-//    {
-//        uint8_t notif2[12];
-//        uint8_t idx2 = 0;
-//        notif2[idx2++] = 0x0C;  // DATA_TYPE
-//        notif2[idx2++] = 0x05;  // LEN
-//
-//        uint16_t amb = 250;     // 25.0°C
-//        uint16_t body = 365;    // 36.5°C
-//        uint16_t dummy_press = 1013;
-//
-//        // Pack first two readings: ambient + body
-//        notif2[idx2++] = (amb >> 8) & 0xFF;
-//        notif2[idx2++] = (amb >> 0) & 0xFF;
-//        notif2[idx2++] = (body >> 8) & 0xFF;
-//        notif2[idx2++] = (body >> 0) & 0xFF;
-//        notif2[idx2++] = 0x00;  // Padding (only two readings fit)
-//
-//        uint32_t ts = 0x60D4A000;
-//        notif2[idx2++] = (ts >> 24) & 0xFF;
-//        notif2[idx2++] = (ts >> 16) & 0xFF;
-//        notif2[idx2++] = (ts >> 8)  & 0xFF;
-//        notif2[idx2++] = (ts >> 0)  & 0xFF;
-//
-//        notif[idx] = ble_calculate_chksum(notif, 11);
-//        p_ble_notify->Status=Notify_Pending;
 
-        // If you want a separate Pressure-only packet, uncomment below:
-        /*
-        uint8_t notif3[12];
-        uint8_t idx3 = 0;
-        notif3[idx3++] = 0x08;  // DATA_TYPE = Pressure
-        notif3[idx3++] = 0x05;  // LEN
-
-        notif3[idx3++] = (dummy_press >> 8) & 0xFF;
-        notif3[idx3++] = (dummy_press >> 0) & 0xFF;
-        notif3[idx3++] = 0x00;
-        notif3[idx3++] = 0x00;
-        notif3[idx3++] = 0x00;
-
-        notif3[idx3++] = (ts >> 24) & 0xFF;
-        notif3[idx3++] = (ts >> 16) & 0xFF;
-        notif3[idx3++] = (ts >> 8)  & 0xFF;
-        notif3[idx3++] = (ts >> 0)  & 0xFF;
-
-        notif3[idx3] = calc_crc(notif3, 11);
-        send_ble_notification(notif3, sizeof(notif3));
-//        */
-//    }
 }
 #endif // BLE_DUMMY
 
@@ -243,6 +198,37 @@ void data_handler_req_hr_spo2(void)
     uart_send_frame(0x01, params);
     uart_receive_response();
 #endif
+}
+
+void data_handler_notify_hr_spo2(void){
+
+	Custom_BLE_Notify_interface_t *p_ble_notify = ble_notify_interface_get();
+	uint8_t *notif = p_ble_notify->pck;
+	uint8_t idx = 0;
+
+	uint16_t hr = (data_handler->payload[0] << 8) + data_handler->payload[1];
+	uint16_t spo2 = (data_handler->payload[2] << 8) + data_handler->payload[3];
+	uint32_t timestamp = (data_handler->payload[4] << 24)
+			+ (data_handler->payload[5] << 16) + (data_handler->payload[6] << 8)
+			+ (data_handler->payload[7]);
+
+	// DATA_TYPE: bitmask for HR (0x01) + SpO₂ (0x02) = 0x03
+	notif[idx++] = CMD_REQ_HR_SPO2_DATA;
+	// LEN: always 0x05
+	notif[idx++] = 0x05;
+	notif[idx++] = 0x00;       // Padding
+	notif[idx++] = (hr >> 8) & 0xFF;
+	notif[idx++] = (hr >> 0) & 0xFF;
+	notif[idx++] = (spo2 >> 8) & 0xFF;
+	notif[idx++] = (spo2 >> 0) & 0xFF;
+
+	notif[idx1++] = (timestamp >> 24) & 0xFF;
+	notif[idx1++] = (timestamp >> 16) & 0xFF;
+	notif[idx1++] = (timestamp >> 8) & 0xFF;
+	notif[idx1++] = (timestamp >> 0) & 0xFF;
+
+	notif[idx1] = ble_calculate_chksum(notif, 11);
+	p_ble_notify->Status = Notify_Pending;
 }
 
 /**
@@ -354,4 +340,26 @@ void data_handler_req_stop_stream(void)
     uint8_t params[4] = {0x00, 0x00, 0x00, 0x00};
 //    uart_send_frame(0x41, params);
 //    uart_receive_response();
+}
+
+
+void data_handler_Init() {
+
+    data_handler = (Data_Handler_t *)malloc(sizeof(Data_Handler_t));
+    data_handler->payload=data_handler_buffer;
+
+    memset(data_handler->payload, 0, DATA_HANDLER_PAYLOAD_LENGHT);
+
+}
+
+void data_handler_DeInit(void) {
+    if (data_handler != NULL) {
+        free(data_handler);
+        data_handler = NULL;
+    }
+
+}
+
+Data_Handler_t* data_handler_get(void) {
+    return data_handler;
 }

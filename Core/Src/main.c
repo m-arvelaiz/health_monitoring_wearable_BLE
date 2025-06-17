@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "data_handler.h"
+#include "uart_handler.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -108,6 +109,8 @@ int main(void)
   MX_RTC_Init();
   MX_RF_Init();
   /* USER CODE BEGIN 2 */
+  data_handler_Init();
+  uart_handler_Init(&hlpuart1);
 
   /* USER CODE END 2 */
 
