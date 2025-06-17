@@ -246,6 +246,53 @@ void data_handler_req_temp(uint8_t temp_type)
 #endif
 }
 
+
+void data_handler_notify_temp(void) {
+	Custom_BLE_Notify_interface_t *p_ble_notify = ble_notify_interface_get();
+	uint8_t *notif = p_ble_notify->pck;
+	uint8_t idx = 0;
+
+	uint8_t temp_type = data_handler->payload[0]; // 0x01 = Body, 0x02 = Env, 0x03 = Both
+	uint16_t val1 = (data_handler->payload[1] << 8) + data_handler->payload[2];
+	uint16_t val2 = (data_handler->payload[3] << 8) + data_handler->payload[4];
+	uint32_t timestamp = (data_handler->payload[5] << 24)
+			+ (data_handler->payload[6] << 16) + (data_handler->payload[7] << 8)
+			+ (data_handler->payload[8]);
+
+	notif[idx++] = CMD_REQ_TEMP_DATA;
+	notif[idx++] = 0x05;
+
+	if (temp_type == 0x01) {
+		notif[idx++] = 0x01;
+		notif[idx++] = (val1 >> 8) & 0xFF;
+		notif[idx++] = (val1 >> 0) & 0xFF;
+		notif[idx++] = 0x00;
+		notif[idx++] = 0x00;
+	} else if (temp_type == 0x02) {
+		notif[idx++] = 0x02;
+		notif[idx++] = (val1 >> 8) & 0xFF;
+		notif[idx++] = (val1 >> 0) & 0xFF;
+		notif[idx++] = 0x00;
+		notif[idx++] = 0x00;
+	} else {
+		notif[idx++] = 0x03;
+		notif[idx++] = (val1 >> 8) & 0xFF;
+		notif[idx++] = (val1 >> 0) & 0xFF;
+		notif[idx++] = (val2 >> 8) & 0xFF;
+		notif[idx++] = (val2 >> 0) & 0xFF;
+	}
+
+	notif[idx++] = (timestamp >> 24) & 0xFF;
+	notif[idx++] = (timestamp >> 16) & 0xFF;
+	notif[idx++] = (timestamp >> 8) & 0xFF;
+	notif[idx++] = (timestamp >> 0) & 0xFF;
+
+	notif[idx] = ble_calculate_chksum(notif, 11);
+	p_ble_notify->Status = Notify_Pending;
+
+}
+
+
 /**
  * @brief  Request Pressure.
  */
@@ -259,6 +306,38 @@ void data_handler_req_pressure(void)
     uart_receive_response();
 #endif
 }
+
+
+void data_handler_notify_pressure(void) {
+    Custom_BLE_Notify_interface_t *p_ble_notify = ble_notify_interface_get();
+    uint8_t *notif = p_ble_notify->pck;
+    uint8_t idx = 0;
+
+
+    uint16_t pressure = (data_handler->payload[0] << 8) + data_handler->payload[1];
+    uint32_t timestamp = (data_handler->payload[2] << 24)
+                       + (data_handler->payload[3] << 16)
+                       + (data_handler->payload[4] << 8)
+                       + (data_handler->payload[5]);
+
+    notif[idx++] = CMD_REQ_PRESSURE_DATA;
+    notif[idx++] = 0x05;
+    notif[idx++] = 0x00;
+    notif[idx++] = (pressure >> 8) & 0xFF;
+    notif[idx++] = (pressure >> 0) & 0xFF;
+    notif[idx++] = 0x00;
+    notif[idx++] = 0x00;
+
+    notif[idx++] = (timestamp >> 24) & 0xFF;
+    notif[idx++] = (timestamp >> 16) & 0xFF;
+    notif[idx++] = (timestamp >> 8) & 0xFF;
+    notif[idx++] = (timestamp >> 0) & 0xFF;
+
+    notif[idx] = ble_calculate_chksum(notif, 11);
+    p_ble_notify->Status = Notify_Pending;
+}
+
+
 
 /**
  * @brief  Request all sensor data (HR, SpO₂, Temp, Pressure).
@@ -307,6 +386,36 @@ void data_handler_req_set_unix_time(uint32_t unix_time)
 //    uart_receive_response();
 }
 
+void data_handler_notify_unix_time(void) {
+    Custom_BLE_Notify_interface_t *p_ble_notify = ble_notify_interface_get();
+    uint8_t *notif = p_ble_notify->pck;
+    uint8_t idx = 0;
+
+
+
+    uint32_t unix_time = (data_handler->payload[0] << 24)
+                       + (data_handler->payload[1] << 16)
+                       + (data_handler->payload[2] << 8)
+                       + (data_handler->payload[3]);
+
+    notif[idx++] = CMD_SET_UNIX_TIME;
+    notif[idx++] = 0x01;
+    notif[idx++] = 0x01; // ACK or OK flag (you can customize this)
+
+    notif[idx++] = (unix_time >> 24) & 0xFF;
+    notif[idx++] = (unix_time >> 16) & 0xFF;
+    notif[idx++] = (unix_time >> 8)  & 0xFF;
+    notif[idx++] = (unix_time >> 0)  & 0xFF;
+
+    for (int i = 7; i < 11; ++i)
+        notif[idx++] = 0x00; // Padding or reserved
+
+    notif[idx] = ble_calculate_chksum(notif, 11);
+    p_ble_notify->Status = Notify_Pending;
+}
+
+
+
 /**
  * @brief  Configure a sensor (sampling rate or future features).
  * @param  sensor_type: 1-byte ID (same as BLE data type).
@@ -318,6 +427,31 @@ void data_handler_req_set_sensor_config(uint8_t sensor_type, uint8_t config_val)
 //    uart_send_frame(0x30, params);
 //    uart_receive_response();
 }
+
+
+void data_handler_notify_set_sensor_config(void) {
+    Custom_BLE_Notify_interface_t *p_ble_notify = ble_notify_interface_get();
+    uint8_t *notif = p_ble_notify->pck;
+    uint8_t idx = 0;
+
+
+
+    uint8_t sensor_type = data_handler->payload[0];
+    uint8_t config_val  = data_handler->payload[1];
+
+    notif[idx++] = CMD_SET_SENSOR_CONFIG;
+    notif[idx++] = 0x02;
+    notif[idx++] = sensor_type;
+    notif[idx++] = config_val;
+
+    for (int i = 0; i < 5; ++i) {
+        notif[idx++] = 0x00; // padding
+    }
+
+    notif[idx] = ble_calculate_chksum(notif, 11);
+    p_ble_notify->Status = Notify_Pending;
+}
+
 
 /**
  * @brief  Start live data streaming.
@@ -332,6 +466,25 @@ void data_handler_req_start_stream(uint8_t stream_mask)
 //    uart_receive_response();
 }
 
+
+void data_handler_notify_start_stream(void) {
+    Custom_BLE_Notify_interface_t *p_ble_notify = ble_notify_interface_get();
+    uint8_t *notif = p_ble_notify->pck;
+    uint8_t idx = 0;
+
+
+    notif[idx++] = CMD_START_STREAM;
+    notif[idx++] = 0x01;
+    notif[idx++] = 0x01; // ACK or stream-started status
+
+    for (int i = 0; i < 8; ++i)
+        notif[idx++] = 0x00; // padding/timestamp (optional)
+
+    notif[idx] = ble_calculate_chksum(notif, 11);
+    p_ble_notify->Status = Notify_Pending;
+}
+
+
 /**
  * @brief  Stop any ongoing live streaming.
  */
@@ -342,6 +495,25 @@ void data_handler_req_stop_stream(void)
 //    uart_receive_response();
 }
 
+
+void data_handler_notify_stop_stream(){
+	 Custom_BLE_Notify_interface_t *p_ble_notify = ble_notify_interface_get();
+	    uint8_t *notif = p_ble_notify->pck;
+	    uint8_t idx = 0;
+
+
+	    notif[idx++] = CMD_STOP_STREAM;
+	    notif[idx++] = 0x01;
+	    notif[idx++] = 0x01; // ACK or stream-started status
+
+	    for (int i = 0; i < 8; ++i)
+	        notif[idx++] = 0x00; // padding/timestamp (optional)
+
+	    notif[idx] = ble_calculate_chksum(notif, 11);
+	    p_ble_notify->Status = Notify_Pending;
+
+
+}
 
 void data_handler_Init() {
 
