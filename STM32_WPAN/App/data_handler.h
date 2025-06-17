@@ -86,6 +86,7 @@ void data_handler_notify_data_stream();
  *         Internally, this function sends a UART frame to stop streaming.
  */
 void data_handler_req_stop_stream(void);
+void data_handler_notify_stop_stream();
 
 #define DATA_HANDLER_PAYLOAD_LENGHT 10
 

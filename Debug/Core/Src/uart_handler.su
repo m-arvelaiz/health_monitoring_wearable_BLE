@@ -1,0 +1,8 @@
+../Core/Src/uart_handler.c:26:6:HAL_UARTEx_RxEventCallback	16	static
+../Core/Src/uart_handler.c:43:16:Calculate_CRC	24	static
+../Core/Src/uart_handler.c:52:13:uart_handler_Process_Received_pck	24	static
+../Core/Src/uart_handler.c:63:13:uart_handler_Send_Cmd	24	static
+../Core/Src/uart_handler.c:83:6:uart_handler_Init	24	static
+../Core/Src/uart_handler.c:108:6:uart_handler_DeInit	8	static
+../Core/Src/uart_handler.c:118:6:uart_handler_Reset_State	8	static
+../Core/Src/uart_handler.c:127:17:uart_handler_get	4	static

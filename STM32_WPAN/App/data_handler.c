@@ -17,6 +17,8 @@
 
 Data_Handler_t* data_handler;
 uint8_t data_handler_buffer[DATA_HANDLER_PAYLOAD_LENGHT];
+uint8_t data_handler_buffer_tx[DATA_HANDLER_PAYLOAD_LENGHT];
+
 /**
  * @brief  Generate and send a dummy HR & SpO₂ notification over BLE.
  *         Structure: [CMD][LEN][DATA(5)][TIMESTAMP(4)][CRC]
@@ -195,8 +197,7 @@ void data_handler_req_hr_spo2(void)
     send_dummy_hr_spo2();
 #else
     uint8_t params[4] = {0x00, 0x00, 0x00, 0x00};
-    uart_send_frame(0x01, params);
-    uart_receive_response();
+    uart_handler_get()->send_cmd(CMD_REQ_HR_SPO2_DATA, params, 4);
 #endif
 }
 
@@ -222,12 +223,12 @@ void data_handler_notify_hr_spo2(void){
 	notif[idx++] = (spo2 >> 8) & 0xFF;
 	notif[idx++] = (spo2 >> 0) & 0xFF;
 
-	notif[idx1++] = (timestamp >> 24) & 0xFF;
-	notif[idx1++] = (timestamp >> 16) & 0xFF;
-	notif[idx1++] = (timestamp >> 8) & 0xFF;
-	notif[idx1++] = (timestamp >> 0) & 0xFF;
+	notif[idx++] = (timestamp >> 24) & 0xFF;
+	notif[idx++] = (timestamp >> 16) & 0xFF;
+	notif[idx++] = (timestamp >> 8) & 0xFF;
+	notif[idx++] = (timestamp >> 0) & 0xFF;
 
-	notif[idx1] = ble_calculate_chksum(notif, 11);
+	notif[idx] = ble_calculate_chksum(notif, 11);
 	p_ble_notify->Status = Notify_Pending;
 }
 
@@ -240,9 +241,8 @@ void data_handler_req_temp(uint8_t temp_type)
 #ifdef BLE_DEBUG_DUMMY_DATA
     send_dummy_temp(temp_type);
 #else
-    uint8_t params[4] = { temp_type, 0x00, 0x00, 0x00 };
-    uart_send_frame(0x02, params);
-    uart_receive_response();
+    uint8_t params[4] = {temp_type, 0x00, 0x00, 0x00};
+    uart_handler_get()->send_cmd(CMD_REQ_TEMP_DATA, params, 4);
 #endif
 }
 
@@ -302,8 +302,7 @@ void data_handler_req_pressure(void)
     send_dummy_pressure();
 #else
     uint8_t params[4] = {0x00, 0x00, 0x00, 0x00};
-    uart_send_frame(0x03, params);
-    uart_receive_response();
+    uart_handler_get()->send_cmd(CMD_REQ_PRESSURE_DATA, params, 4);
 #endif
 }
 
@@ -348,8 +347,7 @@ void data_handler_req_all_data(void)
     send_dummy_all_data();
 #else
     uint8_t params[4] = {0x00, 0x00, 0x00, 0x00};
-    uart_send_frame(0x04, params);
-    uart_receive_response();
+    uart_handler_get()->send_cmd(CMD_REQ_ALL_DATA, params, 4);
 #endif
 }
 
@@ -359,11 +357,13 @@ void data_handler_req_all_data(void)
  */
 void data_handler_req_historical_data(uint32_t start_time)
 {
-    uint8_t params[4];
-    params[0] = (start_time >> 24) & 0xFF;
-    params[1] = (start_time >> 16) & 0xFF;
-    params[2] = (start_time >> 8)  & 0xFF;
-    params[3] = (start_time >> 0)  & 0xFF;
+	uint8_t params[4];
+	params[0] = (start_time >> 24) & 0xFF;
+	params[1] = (start_time >> 16) & 0xFF;
+	params[2] = (start_time >> 8) & 0xFF;
+	params[3] = (start_time >> 0) & 0xFF;
+
+	uart_handler_get()->send_cmd(CMD_REQ_HISTORICAL_DATA, params, 4);
 
 //    uart_send_frame(0x10, params);
 //    uart_receive_response();
@@ -376,14 +376,13 @@ void data_handler_req_historical_data(uint32_t start_time)
  */
 void data_handler_req_set_unix_time(uint32_t unix_time)
 {
-    uint8_t params[4];
-    params[0] = (unix_time >> 24) & 0xFF;
-    params[1] = (unix_time >> 16) & 0xFF;
-    params[2] = (unix_time >> 8)  & 0xFF;
-    params[3] = (unix_time >> 0)  & 0xFF;
+	uint8_t params[4];
+	params[0] = (unix_time >> 24) & 0xFF;
+	params[1] = (unix_time >> 16) & 0xFF;
+	params[2] = (unix_time >> 8) & 0xFF;
+	params[3] = (unix_time >> 0) & 0xFF;
 
-//    uart_send_frame(0x20, params);
-//    uart_receive_response();
+	uart_handler_get()->send_cmd(CMD_SET_UNIX_TIME, params, 4);
 }
 
 void data_handler_notify_unix_time(void) {
@@ -423,7 +422,8 @@ void data_handler_notify_unix_time(void) {
  */
 void data_handler_req_set_sensor_config(uint8_t sensor_type, uint8_t config_val)
 {
-    uint8_t params[4] = { sensor_type, config_val, 0x00, 0x00 };
+	uint8_t params[4] = { sensor_type, config_val, 0x00, 0x00 };
+	uart_handler_get()->send_cmd(CMD_SET_SENSOR_CONFIG, params, 4);
 //    uart_send_frame(0x30, params);
 //    uart_receive_response();
 }
@@ -459,7 +459,8 @@ void data_handler_notify_set_sensor_config(void) {
  */
 void data_handler_req_start_stream(uint8_t stream_mask)
 {
-    uint8_t params[4] = { stream_mask, 0x00, 0x00, 0x00 };
+	uint8_t params[4] = { stream_mask, 0x00, 0x00, 0x00 };
+	uart_handler_get()->send_cmd(CMD_START_STREAM, params, 4);
 //    uart_send_frame(0x40, params);
 //    // The secondary MCU will begin sending periodic frames:
 //    // [START][DATA_TYPE][LEN][DATA...][TIMESTAMP][CRC]
@@ -490,7 +491,8 @@ void data_handler_notify_start_stream(void) {
  */
 void data_handler_req_stop_stream(void)
 {
-    uint8_t params[4] = {0x00, 0x00, 0x00, 0x00};
+	uint8_t params[4] = {0x00, 0x00, 0x00, 0x00};
+	uart_handler_get()->send_cmd(CMD_STOP_STREAM, params, 4);
 //    uart_send_frame(0x41, params);
 //    uart_receive_response();
 }

@@ -28,7 +28,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 	//Check size and the first byte
 	if (Size >=7) {
 
-		if (uart_handler->rx_buffer==0xAA && Size >=7){
+		if (uart_handler->rx_buffer==0xAA){
 
 			uart_handler->process_recived_pck(uart_handler->rx_buffer, Size);
 		}
