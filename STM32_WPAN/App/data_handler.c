@@ -7,6 +7,7 @@
 
 
 #include "data_handler.h"
+#include "uart_handler.h"
 #include "ble_custom_utils.h"
 #include <string.h>
 #include <stdlib.h>
