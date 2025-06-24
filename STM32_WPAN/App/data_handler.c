@@ -12,13 +12,15 @@
 #include <string.h>
 #include <stdlib.h>
 
+Data_Handler_t* data_handler;
+uint8_t data_handler_buffer[DATA_HANDLER_PAYLOAD_LENGHT];
+uint8_t data_handler_buffer_tx[DATA_HANDLER_PAYLOAD_LENGHT];
+
 #ifdef BLE_DEBUG_DUMMY_DATA
 
 
 
-Data_Handler_t* data_handler;
-uint8_t data_handler_buffer[DATA_HANDLER_PAYLOAD_LENGHT];
-uint8_t data_handler_buffer_tx[DATA_HANDLER_PAYLOAD_LENGHT];
+
 
 /**
  * @brief  Generate and send a dummy HR & SpO₂ notification over BLE.
@@ -197,8 +199,8 @@ void data_handler_req_hr_spo2(void)
 #ifdef BLE_DEBUG_DUMMY_DATA
     send_dummy_hr_spo2();
 #else
-    uint8_t params[4] = {0x00, 0x00, 0x00, 0x00};
-    uart_handler_get()->send_cmd(CMD_REQ_HR_SPO2_DATA, params, 4);
+    uint8_t params[5] = {0x00, 0x00, 0x00, 0x00, 0x00};
+    uart_handler_get()->send_cmd(CMD_REQ_HR_SPO2_DATA, params, 5);
 #endif
 }
 
@@ -242,8 +244,8 @@ void data_handler_req_temp(uint8_t temp_type)
 #ifdef BLE_DEBUG_DUMMY_DATA
     send_dummy_temp(temp_type);
 #else
-    uint8_t params[4] = {temp_type, 0x00, 0x00, 0x00};
-    uart_handler_get()->send_cmd(CMD_REQ_TEMP_DATA, params, 4);
+    uint8_t params[5] = {temp_type, 0x00, 0x00, 0x00,0x00};
+    uart_handler_get()->send_cmd(CMD_REQ_TEMP_DATA, params, 5);
 #endif
 }
 
@@ -302,8 +304,8 @@ void data_handler_req_pressure(void)
 #ifdef BLE_DEBUG_DUMMY_DATA
     send_dummy_pressure();
 #else
-    uint8_t params[4] = {0x00, 0x00, 0x00, 0x00};
-    uart_handler_get()->send_cmd(CMD_REQ_PRESSURE_DATA, params, 4);
+    uint8_t params[5] = {0x00, 0x00, 0x00, 0x00, 0x00};
+    uart_handler_get()->send_cmd(CMD_REQ_PRESSURE_DATA, params, 5);
 #endif
 }
 
@@ -516,6 +518,27 @@ void data_handler_notify_stop_stream(){
 	    p_ble_notify->Status = Notify_Pending;
 
 
+}
+
+void data_handler_dispatcher(uint8_t cmd, uint8_t* payload, uint8_t payload_len){
+	memcpy(data_handler->payload, payload, payload_len);
+	switch (cmd) {
+	case CMD_REQ_TEMP_DATA:
+
+		break;
+
+	case CMD_REQ_PRESSURE_DATA:
+		data_handler_notify_pressure();
+		break;
+
+	case CMD_REQ_HR_SPO2_DATA:
+
+		break;
+
+	default:
+		// Unknown command
+		break;
+	}
 }
 
 void data_handler_Init() {

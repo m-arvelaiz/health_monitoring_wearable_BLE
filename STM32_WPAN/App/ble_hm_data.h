@@ -11,7 +11,7 @@
 /* Includes ------------------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 //#include "custom_stm.h"
-#define BLE_DEBUG_DUMMY_DATA
+//#define BLE_DEBUG_DUMMY_DATA
 
 /* USER CODE END Includes */
 

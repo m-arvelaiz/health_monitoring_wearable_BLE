@@ -7,6 +7,7 @@
 
 
 #include "uart_handler.h"
+#include "data_handler.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -28,7 +29,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 	//Check size and the first byte
 	if (Size >=7) {
 
-		if (uart_handler->rx_buffer==0xAA){
+		if ((*uart_handler->rx_buffer)==0xAA){
 
 			uart_handler->process_recived_pck(uart_handler->rx_buffer, Size);
 		}
@@ -42,20 +43,20 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 
 static uint8_t Calculate_CRC(const uint8_t *data, uint8_t length) {
     uint8_t crc = 0;
-    for (uint8_t i = 0; i < length; ++i) {
-        crc ^= data[i];
-    }
-    return crc;
+	for (uint8_t i = 0; i < length; ++i) {
+		crc ^= data[i];
+	}
+	return crc;
 }
 
 // Local functions (assigned as function pointers)
 static void uart_handler_Process_Received_pck(uint8_t* pck, uint16_t size) {
 	//Check CRC
-	uint8_t actual_crc= *(uart_handler->rx_buffer+size);
-	uint8_t calculated_crc=Calculate_CRC(uart_handler->rx_buffer, size);
-    if (actual_crc == calculated_crc) {
-
-    }
+	uint8_t actual_crc= *(uart_handler->rx_buffer+(size-1));
+	uint8_t calculated_crc=Calculate_CRC(uart_handler->rx_buffer, (size-1));
+//    if (actual_crc == calculated_crc) {
+	data_handler_dispatcher(*(uart_handler->rx_buffer+1), uart_handler->rx_buffer+3, *(uart_handler->rx_buffer+2));
+//    }
 
 
 }

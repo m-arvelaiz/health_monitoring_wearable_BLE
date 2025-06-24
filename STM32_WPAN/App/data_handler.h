@@ -100,4 +100,6 @@ Data_Handler_t* data_handler_get(void);
 void data_handler_DeInit(void) ;
 void data_handler_Init();
 
+void data_handler_dispatcher(uint8_t cmd, uint8_t* payload, uint8_t payload_len);
+
 #endif /* APP_DATA_HANDLER_H_ */

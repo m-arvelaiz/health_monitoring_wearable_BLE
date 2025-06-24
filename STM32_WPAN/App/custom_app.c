@@ -143,14 +143,14 @@ void Custom_STM_App_Notification(Custom_STM_App_Notification_evt_t *pNotificatio
 
 		// Filter the CMds
 
-		    if (cmd == 0x01) { // REQ_HR_SPO2_DATA
+		    if (cmd == CMD_REQ_HR_SPO2_DATA) { // REQ_HR_SPO2_DATA
 		    	data_handler_req_hr_spo2();
 
-		    } else if (cmd == 0x02) { // REQ_TEMP_DATA
+		    } else if (cmd == CMD_REQ_TEMP_DATA) { // REQ_TEMP_DATA
 		        uint8_t temp_type = params[0];  // 0x01 = Body, 0x02 = Env, 0x03 = Both
 		        data_handler_req_temp(temp_type);
 
-		    } else if (cmd == 0x03) { // REQ_PRESSURE_DATA
+		    } else if (cmd == CMD_REQ_PRESSURE_DATA) { // REQ_PRESSURE_DATA
 		    	data_handler_req_pressure();
 
 		    } else if (cmd == 0x04) { // REQ_ALL_DATA
