@@ -210,11 +210,11 @@ void data_handler_notify_hr_spo2(void){
 	uint8_t *notif = p_ble_notify->pck;
 	uint8_t idx = 0;
 
-	uint16_t hr = (data_handler->payload[0] << 8) + data_handler->payload[1];
-	uint16_t spo2 = (data_handler->payload[2] << 8) + data_handler->payload[3];
-	uint32_t timestamp = (data_handler->payload[4] << 24)
-			+ (data_handler->payload[5] << 16) + (data_handler->payload[6] << 8)
-			+ (data_handler->payload[7]);
+	uint16_t hr = (data_handler->payload[1] << 8) + data_handler->payload[2];
+	uint16_t spo2 = (data_handler->payload[3] << 8) + data_handler->payload[4];
+	uint32_t timestamp = (data_handler->payload[5] << 24)
+					+ (data_handler->payload[6] << 16) + (data_handler->payload[7] << 8)
+					+ (data_handler->payload[8]);
 
 	// DATA_TYPE: bitmask for HR (0x01) + SpO₂ (0x02) = 0x03
 	notif[idx++] = CMD_REQ_HR_SPO2_DATA;
@@ -263,7 +263,7 @@ void data_handler_notify_temp(void) {
 			+ (data_handler->payload[8]);
 
 	notif[idx++] = CMD_REQ_TEMP_DATA;
-	notif[idx++] = 0x05;
+	notif[idx++] = 0x05; //TODO:len of payload
 
 	if (temp_type == 0x01) {
 		notif[idx++] = 0x01;
@@ -316,18 +316,18 @@ void data_handler_notify_pressure(void) {
     uint8_t idx = 0;
 
 
-    uint16_t pressure = (data_handler->payload[0] << 8) + data_handler->payload[1];
-    uint32_t timestamp = (data_handler->payload[2] << 24)
-                       + (data_handler->payload[3] << 16)
-                       + (data_handler->payload[4] << 8)
-                       + (data_handler->payload[5]);
+    uint16_t pressure = (data_handler->payload[1] << 16)
+			+ (data_handler->payload[2] << 8) + (data_handler->payload[3]);
+	uint32_t timestamp = (data_handler->payload[5] << 24)
+			+ (data_handler->payload[6] << 16) + (data_handler->payload[7] << 8)
+			+ (data_handler->payload[8]);
 
     notif[idx++] = CMD_REQ_PRESSURE_DATA;
     notif[idx++] = 0x05;
     notif[idx++] = 0x00;
+    notif[idx++] = (pressure >> 16) & 0xFF;
     notif[idx++] = (pressure >> 8) & 0xFF;
     notif[idx++] = (pressure >> 0) & 0xFF;
-    notif[idx++] = 0x00;
     notif[idx++] = 0x00;
 
     notif[idx++] = (timestamp >> 24) & 0xFF;
@@ -522,8 +522,12 @@ void data_handler_notify_stop_stream(){
 
 void data_handler_dispatcher(uint8_t cmd, uint8_t* payload, uint8_t payload_len){
 	memcpy(data_handler->payload, payload, payload_len);
+	//clean the buffer of notification
+	Custom_BLE_Notify_interface_t *p_ble_notify = ble_notify_interface_get();
+	memset(p_ble_notify->pck, 0, 20);
 	switch (cmd) {
 	case CMD_REQ_TEMP_DATA:
+		data_handler_notify_temp();
 
 		break;
 
@@ -532,6 +536,7 @@ void data_handler_dispatcher(uint8_t cmd, uint8_t* payload, uint8_t payload_len)
 		break;
 
 	case CMD_REQ_HR_SPO2_DATA:
+		data_handler_notify_hr_spo2();
 
 		break;
 

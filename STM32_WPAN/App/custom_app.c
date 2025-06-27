@@ -92,8 +92,8 @@ void myTask(void){
 //		UpdateCharData[0]+=0x01;
 
 
-		Custom_Charnotify_Update_Char(); // This function triggers the Notificaation of the the content of NotifyCharData array
-
+//		Custom_Charnotify_Update_Char(); // This function triggers the Notificaation of the the content of NotifyCharData array
+		Custom_Charnotify_Send_Notification();
 	}
 
 
@@ -260,7 +260,8 @@ void Custom_APP_Init(void)
 	Notify_Interface.Status=Notify_None;
 	Notify_Interface.checkSum=0;
 	Notify_Interface.length=0;
-	Notify_Interface.pck=UpdateCharData;
+//	Notify_Interface.pck=UpdateCharData;
+	Notify_Interface.pck=NotifyCharData;
 
   /* USER CODE END CUSTOM_APP_Init */
   return;
@@ -302,7 +303,7 @@ void Custom_Charnotify_Send_Notification(void) /* Property Notification */
   uint8_t updateflag = 0;
 
   /* USER CODE BEGIN Charnotify_NS_1*/
-
+  updateflag=1;
   /* USER CODE END Charnotify_NS_1*/
 
   if (updateflag != 0)

@@ -43,7 +43,9 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 
 static uint8_t Calculate_CRC(const uint8_t *data, uint8_t length) {
     uint8_t crc = 0;
+    uint8_t debug_data;
 	for (uint8_t i = 0; i < length; ++i) {
+		debug_data=data[i];
 		crc ^= data[i];
 	}
 	return crc;
